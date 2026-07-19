@@ -3,11 +3,43 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#07130f">
+  <meta name="description" content="Build meaningful conversations, complete daily goals and grow your Earn Chat progress.">
   <title>Earn Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/tokens.css">
+  <link rel="stylesheet" href="assets/css/app.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module" src="assets/js/app.js"></script>
 </head>
 <body>
-  <!-- Application markup is intentionally deferred until the compatibility audit passes. -->
-  <main id="app" aria-live="polite"></main>
+  <div class="app-frame">
+    <header class="site-header" data-public-header>
+      <a class="brand" href="#/" aria-label="Earn Chat home">
+        <span class="brand-mark" aria-hidden="true">💬</span>
+        <span>Earn <strong>Chat</strong></span>
+      </a>
+      <span class="live-pill"><i></i> LIVE</span>
+    </header>
+
+    <main id="app" tabindex="-1" aria-live="polite">
+      <section class="boot-screen" aria-label="Loading Earn Chat">
+        <span class="loader" aria-hidden="true"></span>
+        <p>Preparing your experience…</p>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" data-bottom-nav hidden aria-label="Primary navigation">
+      <a href="#/home" data-nav="home"><span>⌂</span>Home</a>
+      <a href="#/tasks" data-nav="tasks"><span>✓</span>Tasks</a>
+      <a href="#/progress" data-nav="progress"><span>↗</span>Progress</a>
+      <a href="#/profile" data-nav="profile"><span>●</span>Profile</a>
+    </nav>
+  </div>
+
+  <div id="toast-region" class="toast-region" aria-live="assertive" aria-atomic="true"></div>
+  <noscript><div class="noscript">Earn Chat requires JavaScript to securely load your account.</div></noscript>
 </body>
 </html>
