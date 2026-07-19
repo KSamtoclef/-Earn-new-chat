@@ -13,5 +13,10 @@ export const platform = Object.freeze({
   openConversation: (partnerKey) => rpc('earn_chat_open_conversation', { p_partner_key: partnerKey }),
   sendMessage: ({ threadId, content, clientMessageId, selectedIntent = null }) => rpc('earn_chat_send_message', {
     p_thread_id: threadId, p_content: content, p_client_message_id: clientMessageId, p_selected_intent: selectedIntent
-  })
+  }),
+  inlineSponsored: (threadId) => rpc('earn_chat_get_inline_sponsored', { p_thread_id: threadId }),
+  sponsoredImpression: (opportunityId) => rpc('earn_chat_record_sponsored_impression', { p_opportunity_id: opportunityId }),
+  beginSponsored: (opportunityId) => rpc('earn_chat_begin_sponsored', { p_opportunity_id: opportunityId }),
+  sponsoredReturn: (opportunityId) => rpc('earn_chat_record_sponsored_return', { p_opportunity_id: opportunityId }),
+  verifySponsored: (opportunityId) => rpc('earn_chat_verify_sponsored', { p_opportunity_id: opportunityId })
 });
