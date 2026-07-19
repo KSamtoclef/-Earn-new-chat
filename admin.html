@@ -4,10 +4,31 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#07130f">
   <title>Earn Chat Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/tokens.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module" src="assets/js/admin.js"></script>
 </head>
 <body>
-  <!-- Admin markup is intentionally deferred until the compatibility audit passes. -->
-  <main id="admin-app" aria-live="polite"></main>
+  <div class="admin-shell">
+    <aside class="admin-sidebar">
+      <a class="admin-brand" href="admin.html"><span>💬</span><b>Earn Chat</b><small>ADMIN</small></a>
+      <nav id="admin-tabs" aria-label="Admin sections"></nav>
+      <a class="back-link" href="index.html">← Return to website</a>
+    </aside>
+    <section class="admin-workspace">
+      <header class="admin-header">
+        <div><p>OPERATIONS</p><h1 id="page-title">Overview</h1></div>
+        <div class="admin-header-actions"><button id="refresh-button" type="button">↻ Refresh</button><button id="signout-button" type="button">Sign out</button></div>
+      </header>
+      <main id="admin-app" aria-live="polite"><div class="admin-loading"><i></i><span>Checking administrator access…</span></div></main>
+    </section>
+  </div>
+  <div id="admin-toast" class="admin-toast" role="status" aria-live="polite" hidden></div>
 </body>
 </html>
