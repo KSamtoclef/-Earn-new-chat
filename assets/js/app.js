@@ -53,7 +53,7 @@ async function ensureWallet(token,force=false) {
 
 async function openChat(partnerKey) {
   root.innerHTML='<section class="boot-screen"><span class="loader"></span><p>Opening conversation…</p></section>';
-  try { const chat=await platform.openConversation(partnerKey);store.set({activeChat:chat});navigate(`/chat/${encodeURIComponent(partnerKey)}`);await render(); }
+  try { const chat=await platform.openConversation(partnerKey);chat.sponsored_card=await platform.inlineSponsored(chat.thread_id);store.set({activeChat:chat});navigate(`/chat/${encodeURIComponent(partnerKey)}`);await render(); }
   catch(error){notify(error.message||'Conversation could not open.');navigate('/home',true);await render();}
 }
 
@@ -90,10 +90,38 @@ async function render() {
     try{
       const partnerKey=decodeURIComponent(route.slice(6));
       let chat=store.get().activeChat;
-      if(!chat||chat.partner?.partner_key!==partnerKey){root.innerHTML='<section class="boot-screen"><span class="loader"></span><p>Restoring conversation…</p></section>';chat=await platform.openConversation(partnerKey);store.set({activeChat:chat});}
+      if(!chat||chat.partner?.partner_key!==partnerKey){root.innerHTML='<section class="boot-screen"><span class="loader"></span><p>Restoring conversation…</p></section>';chat=await platform.openConversation(partnerKey);chat.sponsored_card=await platform.inlineSponsored(chat.thread_id);store.set({activeChat:chat});}
       let wallet=await ensureWallet(token);if(token!==renderToken)return;
       const draw=()=>renderChat(root,store.get().activeChat,store.get().wallet,{
         back:()=>navigate('/home'),tasks:()=>navigate('/tasks'),
+        impressSponsored:async(card)=>{
+          if(!card||card.status!=='available')return;
+          card.status='impressed';
+          try{await platform.sponsoredImpression(card.opportunity_id);}catch(error){card.status='available';}
+        },
+        openSponsored:async(card)=>{
+          if(!card)return;
+          const tab=window.open('about:blank','_blank');
+          if(tab)tab.opener=null;
+          try{
+            const opened=await platform.beginSponsored(card.opportunity_id);
+            const currentChat=store.get().activeChat;
+            card.status='clicked';card.minimum_seconds_away=opened.minimum_seconds_away;
+            store.set({activeChat:currentChat});draw();
+            if(tab)tab.location.replace(opened.destination_url);else window.location.assign(opened.destination_url);
+          }catch(error){if(tab)tab.close();notify(error.message||'Sponsored activity could not open.');}
+        },
+        verifySponsored:async(card)=>{
+          if(!card)return;
+          try{
+            if(card.status==='clicked')await platform.sponsoredReturn(card.opportunity_id);
+            const result=await platform.verifySponsored(card.opportunity_id);
+            const freshWallet=await platform.wallet();
+            const currentChat=store.get().activeChat;
+            card.status=result.status;store.set({activeChat:currentChat,wallet:freshWallet,home:null});draw();
+            notify(result.credited_minor>0?`Sponsored reward credited: $${(Number(result.credited_minor)/100).toFixed(2)}`:'Sponsored activity already verified.');
+          }catch(error){notify(error.message||'Return verification is not ready yet.');}
+        },
         send:async({content,selectedIntent})=>{
           if(store.get().activeChat?.sending)return;
           const current=store.get().activeChat;
@@ -105,6 +133,7 @@ async function render() {
             const optimisticMessage=current.messages[current.messages.length-1];
             if (optimisticMessage?.sender === 'user') optimisticMessage.quality_label=result.quality_label;
             current.messages.push({sender:'partner',content:result.partner_message?.content});current.suggestions=result.suggestions||[];current.conversation_completed=Boolean(result.conversation_completed);current.status=result.conversation_completed?'completed':'active';current.meaningful_message_count=Number(current.meaningful_message_count||0)+(result.quality_label==='meaningful'?1:0);current.sending=false;
+            if(!current.conversation_completed)current.sponsored_card=await platform.inlineSponsored(current.thread_id);
             store.set({activeChat:current,wallet:freshWallet,home:null});draw();showQuality(root,result,credited);
           }catch(error){current.sending=false;current.messages=current.messages.slice(0,-1);store.set({activeChat:current});draw();notify(error.message||'Message could not be sent.');}
         }
