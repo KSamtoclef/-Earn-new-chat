@@ -223,7 +223,7 @@ begin
   status=case when v_next.is_completion then 'completed' else 'active' end,completed_at=case when v_next.is_completion then now() else null end where id=v_thread.id;
  if v_meaningful then
    insert into public.earn_chat_memories(user_id,partner_id,memory_key,memory_value,confidence,source_message_id)
-   values(v_uid,v_thread.partner_id,'recent_'+v_intent,left(trim(p_content),500),0.8,v_user_message)
+   values(v_uid,v_thread.partner_id,'recent_'||v_intent,left(trim(p_content),500),0.8,v_user_message)
    on conflict(user_id,partner_id,memory_key) do update set memory_value=excluded.memory_value,confidence=excluded.confidence,source_message_id=excluded.source_message_id,updated_at=now();
    update public.earn_chat_user_progression set meaningful_messages=meaningful_messages+1,progress_points=progress_points+2,updated_at=now() where user_id=v_uid;
    update public.earn_chat_streaks set current_streak=case when last_active_date=v_date then current_streak when last_active_date=v_date-1 then current_streak+1 else 1 end,
