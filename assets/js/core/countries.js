@@ -1,0 +1,25 @@
+const regionCodes = 'AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW'.split(' ');
+const fallbackNames = { NG:'Nigeria', GH:'Ghana', CM:'Cameroon', MZ:'Mozambique', US:'United States', GB:'United Kingdom' };
+
+const displayNames = typeof Intl.DisplayNames === 'function' ? new Intl.DisplayNames(['en'], { type: 'region' }) : null;
+export const countries = regionCodes.map((code) => ({ code, name: displayNames?.of(code) || fallbackNames[code] || code })).sort((a,b) => a.name.localeCompare(b.name));
+
+const cookieName = 'earn_chat_country';
+export function savedCountry() {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${cookieName}=([A-Z]{2})(?:;|$)`));
+  return match?.[1] || null;
+}
+export function saveCountry(code) {
+  if (!/^[A-Z]{2}$/.test(code)) return;
+  document.cookie = `${cookieName}=${code}; Max-Age=31536000; Path=/; SameSite=Lax; Secure`;
+}
+export async function detectCountry() {
+  const saved = savedCountry();
+  if (saved) return saved;
+  try {
+    const response = await fetch('/api/country', { credentials: 'same-origin', headers: { Accept: 'application/json' } });
+    if (!response.ok) return null;
+    const result = await response.json();
+    return /^[A-Z]{2}$/.test(result.country || '') ? result.country : null;
+  } catch { return null; }
+}
