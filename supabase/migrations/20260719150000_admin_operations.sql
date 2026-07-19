@@ -202,7 +202,9 @@ begin
  if p_offer_key !~ '^[a-z0-9][a-z0-9_-]{2,79}$' or char_length(trim(p_title))<3 or char_length(trim(p_description))<5 then raise exception 'Offer details are invalid'; end if;
  if p_destination_url !~ '^https://[^[:space:]]+$' then raise exception 'Offer destination must use HTTPS'; end if;
  if p_placement not in('inline_chat','daily_task','post_chat') or p_minimum_replies<0 or p_minimum_seconds not between 0 and 3600 or p_reward_minor<0 then raise exception 'Offer rules are invalid'; end if;
- if p_id is not null then select to_jsonb(o) into v_before from public.earn_chat_sponsored_offers o where id=p_id for update;
+ if p_id is not null then
+  select to_jsonb(o) into v_before from public.earn_chat_sponsored_offers o where id=p_id for update;
+ end if;
  if p_id is null then
   insert into public.earn_chat_sponsored_offers(offer_key,title,description,destination_url,placement,minimum_meaningful_replies,minimum_seconds_away,reward_minor,reward_descriptor,active)
   values(p_offer_key,trim(p_title),trim(p_description),p_destination_url,p_placement,p_minimum_replies,p_minimum_seconds,p_reward_minor,jsonb_build_object('currency_code','USD','reward_minor',p_reward_minor),p_active) returning id into v_id;
