@@ -8,6 +8,8 @@ async function rpc(name, params = {}) {
 
 export const platform = Object.freeze({
   home: () => rpc('earn_chat_get_home_state'),
+  wallet: () => rpc('earn_chat_get_wallet_state'),
+  setCountry: (countryCode, preferredCurrency = 'USD') => rpc('earn_chat_set_country', { p_country_code: countryCode, p_preferred_currency: preferredCurrency }),
   openConversation: (partnerKey) => rpc('earn_chat_open_conversation', { p_partner_key: partnerKey }),
   sendMessage: ({ threadId, content, clientMessageId, selectedIntent = null }) => rpc('earn_chat_send_message', {
     p_thread_id: threadId, p_content: content, p_client_message_id: clientMessageId, p_selected_intent: selectedIntent
