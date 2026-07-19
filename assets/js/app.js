@@ -1,9 +1,12 @@
 import { store } from './core/store.js';
 import { currentRoute, isPublicRoute, navigate, onRouteChange } from './core/router.js';
-import { getSession, watchAuth } from './services/auth.js';
+import { getSession, logout, watchAuth } from './services/auth.js';
 import { platform } from './services/platform.js';
 import { renderAuth } from './features/auth-view.js';
 import { renderHome } from './features/home-view.js';
+import { renderTasks } from './features/tasks-view.js';
+import { renderProgress } from './features/progress-view.js';
+import { renderProfile } from './features/profile-view.js';
 
 const root = document.getElementById('app');
 const header = document.querySelector('[data-public-header]');
@@ -25,6 +28,15 @@ function showPlaceholder(route) {
   root.innerHTML = `<section class="page"><div class="section-heading"><h2>${title}</h2></div><div class="empty-card">This screen is part of the next Stage 4 checkpoint. Your server state is already protected and preserved.</div></section>`;
 }
 
+async function ensureHome(token) {
+  const cached = store.get().home;
+  if (cached) return cached;
+  const home = await platform.home();
+  if (token !== renderToken) return null;
+  store.set({ home });
+  return home;
+}
+
 function setChrome(authenticated, route) {
   header.hidden = authenticated;
   nav.hidden = !authenticated;
@@ -41,9 +53,15 @@ async function render() {
   setChrome(Boolean(state.session), route);
   if (route === '/') return showLanding();
   if (route === '/login' || route === '/register') return renderAuth(root, route.slice(1), async () => { const session = await getSession(); store.set({ session, user: session?.user || null }); navigate('/home', true); await render(); }, notify);
-  if (route === '/home') {
+  if (route === '/home' || route === '/tasks' || route === '/progress' || route === '/profile') {
     root.innerHTML = '<section class="boot-screen"><span class="loader"></span><p>Loading today’s plan…</p></section>';
-    try { const home = await platform.home(); if (token !== renderToken) return; store.set({ home }); renderHome(root, home, { resume: () => notify('Chat screen arrives in Stage 5.'), openPartner: () => notify('Chat screen arrives in Stage 5.') }); }
+    try {
+      const home = await ensureHome(token); if (!home || token !== renderToken) return;
+      if (route === '/home') renderHome(root, home, { resume: () => notify('Chat screen arrives in Stage 5.'), openPartner: () => notify('Chat screen arrives in Stage 5.') });
+      if (route === '/tasks') renderTasks(root, home);
+      if (route === '/progress') renderProgress(root, home);
+      if (route === '/profile') renderProfile(root, home, state.user, { navigate, notify, logout: async () => { try { await logout(); store.set({ session: null, user: null, home: null }); navigate('/', true); await render(); } catch (error) { notify(error.message || 'Could not log out.'); } } });
+    }
     catch (error) { root.innerHTML = `<section class="error-screen"><h2>We could not load today’s plan</h2><p>${String(error.message || 'Please try again.')}</p><button class="button button-primary" data-retry>Try Again</button></section>`; root.querySelector('[data-retry]')?.addEventListener('click', render); }
     return;
   }
