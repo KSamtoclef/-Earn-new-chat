@@ -8,6 +8,20 @@ function messageMarkup(message) {
   return `<div class="chat-message ${side}"><div class="chat-bubble">${safe(message.content)}</div>${message.quality_label ? `<span class="message-quality ${safe(message.quality_label)}">${safe(message.quality_label.replace('_',' '))}</span>` : ''}</div>`;
 }
 
+function sponsoredMarkup(card) {
+  if (!card) return '';
+  const reward=usd.format(Number(card.reward_minor||0)/100);
+  const finished=card.status==='credited';
+  const waiting=['clicked','returned','verified'].includes(card.status);
+  return `<article class="inline-sponsored ${finished?'completed':''}" data-sponsored-card>
+    <div class="sponsored-label">Sponsored · Bonus opportunity</div><div class="sponsored-reward">${safe(reward)}</div>
+    <h2>${safe(card.title)}</h2><p>${safe(card.description)}</p>
+    <div class="sponsored-steps"><span class="done">Engage</span><i></i><span class="${waiting||finished?'done':''}">Visit</span><i></i><span class="${finished?'done':''}">Verify</span></div>
+    ${finished?'<strong class="sponsored-success">✓ Reward verified and credited</strong>':waiting?'<button class="button button-primary" data-sponsored-verify>Verify My Return</button>':'<button class="button button-primary" data-sponsored-open>Open Sponsored Activity →</button>'}
+    <small>${waiting?`Return after at least ${Number(card.minimum_seconds_away||0)} seconds to verify.`:'Opens in a new tab. Return here after completing the activity.'}</small>
+  </article>`;
+}
+
 export function renderChat(root, chat, wallet, actions) {
   const partner = chat.partner || {};
   const messages = Array.isArray(chat.messages) ? chat.messages : [];
@@ -15,7 +29,7 @@ export function renderChat(root, chat, wallet, actions) {
   root.innerHTML = `<section class="chat-page">
     <header class="chat-header"><button class="chat-back" data-back aria-label="Back to dashboard">←</button><div class="chat-avatar">${safe(partner.avatar || '💬')}</div><div class="chat-person"><strong>${safe(partner.display_name || 'Chat Partner')}</strong><span><i></i>${completed ? 'Conversation complete' : `${safe(partner.conversation_mood || 'friendly')} · online`}</span></div><div class="chat-wallet"><small>Balance</small><strong>${usd.format(Number(wallet?.balances?.USD || 0)/100)}</strong></div></header>
     <div class="chat-context"><span>${safe(partner.location || 'Worldwide')}</span><b>Meaningful replies ${chat.meaningful_message_count || 0}</b></div>
-    <div class="chat-messages" data-messages>${messages.map(messageMarkup).join('')}${completed ? completionMarkup() : ''}</div>
+    <div class="chat-messages" data-messages>${messages.map(messageMarkup).join('')}${sponsoredMarkup(chat.sponsored_card)}${completed ? completionMarkup() : ''}</div>
     ${completed ? '' : `<div class="suggestions" data-suggestions>${suggestionMarkup(chat.suggestions)}</div><form class="chat-composer" data-composer><textarea name="message" rows="1" maxlength="1200" placeholder="Write a meaningful reply…" aria-label="Message"></textarea><button type="submit" aria-label="Send message">➤</button></form>`}
     <div class="quality-feedback" data-feedback hidden></div>
   </section>`;
@@ -26,6 +40,9 @@ export function renderChat(root, chat, wallet, actions) {
   root.querySelector('[data-composer]')?.addEventListener('submit',(event)=>{event.preventDefault();const field=event.currentTarget.elements.message;const content=field.value.trim();if(!content)return;field.value='';actions.send({content,selectedIntent:null});});
   root.querySelector('[data-new-chat]')?.addEventListener('click',actions.back);
   root.querySelector('[data-tasks]')?.addEventListener('click',actions.tasks);
+  root.querySelector('[data-sponsored-open]')?.addEventListener('click',()=>actions.openSponsored(chat.sponsored_card));
+  root.querySelector('[data-sponsored-verify]')?.addEventListener('click',()=>actions.verifySponsored(chat.sponsored_card));
+  if(chat.sponsored_card?.status==='available')actions.impressSponsored(chat.sponsored_card);
 }
 
 function suggestionMarkup(suggestions) {
