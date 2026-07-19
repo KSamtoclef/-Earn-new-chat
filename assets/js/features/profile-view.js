@@ -11,7 +11,7 @@ export function renderProfile(root, home, wallet, user, actions) {
     <div class="section-heading"><h2>Account</h2></div><div class="menu-list">
       <button class="menu-item" data-route="/progress"><i>⭐</i><span><strong>Progress and levels</strong><small>View streaks and upcoming unlocks</small></span><b>›</b></button>
       <button class="menu-item" data-route="/tasks"><i>✓</i><span><strong>Daily tasks</strong><small>Review goals and task progress</small></span><b>›</b></button>
-      <button class="menu-item" data-notice="Withdrawal and KYC arrive in Stage 6."><i>🪪</i><span><strong>KYC and withdrawal</strong><small>Secure verification and payout journey</small></span><b>›</b></button>
+      <button class="menu-item" data-route="/withdrawal"><i>🪪</i><span><strong>KYC and withdrawal</strong><small>Secure verification and payout journey</small></span><b>›</b></button>
       <button class="menu-item" data-notice="Support details will be added before production cutover."><i>?</i><span><strong>Help and support</strong><small>Account and platform assistance</small></span><b>›</b></button>
       <button class="menu-item danger" data-logout><i>↪</i><span><strong>Log out</strong><small>End this device session</small></span><b>›</b></button>
     </div><p class="legal-note">Earn Chat uses server-authoritative balances and progress. Never share your password or verification code with anyone.</p>
