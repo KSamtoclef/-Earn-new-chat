@@ -1,4 +1,4 @@
-const state = { session: null, user: null, home: null, wallet: null, activeChat: null, route: '/', loading: true };
+const state = { session: null, user: null, home: null, wallet: null, payout: null, activeChat: null, route: '/', loading: true };
 const listeners = new Set();
 
 export const store = {
