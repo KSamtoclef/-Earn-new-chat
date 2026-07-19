@@ -35,8 +35,10 @@ h1 em { color: var(--green); font-style: normal; }
 .auth-intro { color: var(--muted); text-align: center; line-height: 1.5; margin-bottom: 26px; }
 .form { display: grid; gap: 15px; }
 .field label { display: block; margin-bottom: 7px; color: #c1d0c9; font-size: 12px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
-.field input { width: 100%; height: 55px; padding: 0 15px; border-radius: 14px; border: 1px solid var(--line); outline: none; background: var(--surface); color: var(--text); font-size: 16px; }
-.field input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,214,111,.1); }
+.field input,.field select { width: 100%; height: 55px; padding: 0 15px; border-radius: 14px; border: 1px solid var(--line); outline: none; background: var(--surface); color: var(--text); font-size: 16px; }
+.field select { appearance: none; background-image: linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%); background-position: calc(100% - 19px) 23px,calc(100% - 14px) 23px; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 36px; }
+.field input:focus,.field select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,214,111,.1); }
+.field-hint { display: block; margin-top: 6px; color: var(--muted-2); font-size: 10px; line-height: 1.4; }
 .form-error { padding: 11px 13px; border: 1px solid rgba(255,107,107,.4); border-radius: 11px; background: rgba(255,107,107,.08); color: #ff9d9d; font-size: 13px; }
 .auth-switch { margin: 17px 0 0; text-align: center; color: var(--muted); font-size: 14px; }
 .auth-switch a { color: var(--green); font-weight: 700; }
