@@ -11,10 +11,10 @@ export function watchAuth(callback) {
   return () => data.subscription.unsubscribe();
 }
 
-export async function register({ fullName, email, password }) {
+export async function register({ fullName, email, password, country }) {
   const { data, error } = await getSupabase().auth.signUp({
     email: email.trim().toLowerCase(), password,
-    options: { data: { full_name: fullName.trim() } }
+    options: { data: { full_name: fullName.trim(), country_code: country } }
   });
   if (error) throw error;
   return data;
