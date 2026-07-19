@@ -194,13 +194,17 @@ declare
   v_elapsed integer;
 begin
   if v_uid is null then raise exception 'Authentication required' using errcode='28000'; end if;
-  select o,f.minimum_seconds_away into v_row,v_minimum
+  select o.* into v_row
   from public.earn_chat_sponsored_opportunities o
-  join public.earn_chat_sponsored_offers f on f.id=o.offer_id
-  where o.id=p_opportunity_id and o.user_id=v_uid for update of o;
+  where o.id=p_opportunity_id and o.user_id=v_uid
+  for update;
   if not found or v_row.status<>'clicked' or v_row.clicked_at is null then
     raise exception 'Sponsored return is unavailable';
   end if;
+  select minimum_seconds_away into v_minimum
+  from public.earn_chat_sponsored_offers
+  where id=v_row.offer_id;
+  if v_minimum is null then raise exception 'Sponsored offer is unavailable'; end if;
   v_elapsed:=extract(epoch from (now()-v_row.clicked_at))::integer;
   if v_elapsed<v_minimum then
     raise exception 'Sponsored activity is not ready for verification';
